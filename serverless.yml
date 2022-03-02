@@ -1,25 +1,25 @@
-service: virtual-clinical-datastore
+service: serverless-mock-api
 
 provider:
   name: aws
-  runtime: dotnetcore2.1
-  stage:  ${opt:stage, 'test'} 
+  runtime: net6.0
+  stage: ${opt:stage, 'test'}
   region: ${opt:region, 'eu-west-2'}
   stackName: ${self:provider.stage}-mock-api-stack
   apiName: ${self:provider.stage}-mock-api
   bucketName: ${self:provider.stage}-mock-api-config
   iamRoleStatements:
-  - Effect: Allow
-    Action: 
-      - s3:*
-    Resource: "arn:aws:s3:::*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::*"
 
 package:
   individually: true
 
 functions:
   data-mock:
-    handler: SecByte.MockApi.Server::SecByte.MockApi.Server.LambdaEntryPoint::FunctionHandlerAsync
+    handler: MockApi.Server::MockApi.Server.LambdaEntryPoint::FunctionHandlerAsync
     environment:
       DataSource: s3:${self:provider.bucketName}
       RoutesFile: routes.json

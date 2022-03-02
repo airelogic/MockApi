@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public class RouteSetupInfo
     {
@@ -14,7 +14,7 @@ namespace SecByte.MockApi.Server
 
         public object Response { get; set; }
 
-        public RouteSetupInfo() 
+        public RouteSetupInfo()
         {
             Headers = new Dictionary<string, string>();
         }

@@ -1,16 +1,12 @@
-using System;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace SecByte.MockApi.Server.Handlers
+namespace MockApi.Server.Handlers
 {
     internal class SetupHandler : RequestHandler
     {
         public SetupHandler(RouteCache routeCache) : base(routeCache)
-        {            
+        {
         }
 
         public override async Task<MockApiResponse> ProcessRequest(IHttpRequestFeature request)
@@ -19,8 +15,9 @@ namespace SecByte.MockApi.Server.Handlers
             var method = request.GetMockApiMethod();
             var statusCode = request.GetMockApiStatus();
             var bodyAsText = await request.Body.ReadAsTextAsync();
+            var onceOnly = request.GetMockApiFlag("Once");
 
-            RouteCache.RegisterRouteSteup(method, path, bodyAsText, statusCode);
+            RouteCache.RegisterRouteSetup(method, path, bodyAsText, statusCode, onceOnly);
 
             return new MockApiResponse
             {

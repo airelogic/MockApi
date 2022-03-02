@@ -1,8 +1,7 @@
 using System;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace SecByte.MockApi.Server.Handlers
+namespace MockApi.Server.Handlers
 {
     internal class HandlerFactory
     {

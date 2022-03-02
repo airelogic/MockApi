@@ -1,11 +1,9 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Amazon.S3;
 using Microsoft.Extensions.Options;
 
-#pragma warning disable CA1822 // Members that do not access instance data can be marked as static
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public class S3FileReader : IFileReader
     {
@@ -20,7 +18,7 @@ namespace SecByte.MockApi.Server
 
         public async Task<string> ReadContentsAsync(string file)
         {
-             var s3Response = await _s3Service.GetObjectAsync(_bucketName, file);
+            var s3Response = await _s3Service.GetObjectAsync(_bucketName, file);
             if ((int)s3Response.HttpStatusCode != 200)
             {
                 throw new FileLoadException($"Unable to retrieve the configuration document from {_bucketName}:{file}");

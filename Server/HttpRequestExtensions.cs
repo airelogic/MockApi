@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public static class HttpRequestExtensions
     {
@@ -41,14 +39,25 @@ namespace SecByte.MockApi.Server
             return 200;
         }
 
+        public static bool GetMockApiFlag(this IHttpRequestFeature request, string flag)
+        {
+            string header = $"MockApi-Flag-{flag}";
+            if (request.Headers.ContainsKey(header))
+            {
+                return bool.Parse(request.Headers[header]);
+            }
+
+            return false;
+        }
+
         public static Dictionary<string, StringValues> GetQuery(this IHttpRequestFeature request)
         {
             return Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(request.QueryString);
         }
 
         public static Task<string> ReadAsTextAsync(this Stream stream)
-        {            
-            using(var streamReader = new StreamReader(stream))
+        {
+            using (var streamReader = new StreamReader(stream))
             {
                 return streamReader.ReadToEndAsync();
             }

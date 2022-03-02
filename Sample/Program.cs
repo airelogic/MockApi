@@ -1,5 +1,5 @@
 ﻿using System;
-using SecByte.MockApi.Client;
+using MockApi.Client;
 
 namespace Sample
 {

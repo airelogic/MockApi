@@ -1,9 +1,7 @@
-using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace SecByte.MockApi.Server.Handlers
+namespace MockApi.Server.Handlers
 {
     internal abstract class RequestHandler
     {
