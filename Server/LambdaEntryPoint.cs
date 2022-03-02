@@ -8,7 +8,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public class LambdaEntryPoint : Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction
     {
@@ -18,6 +18,6 @@ namespace SecByte.MockApi.Server
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration(cb => cb.AddEnvironmentVariables())
                 .UseStartup<Startup>();
-        }        
+        }
     }
 }

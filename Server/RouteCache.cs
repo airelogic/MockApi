@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -6,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     internal class RouteCache
     {
@@ -35,27 +34,36 @@ namespace SecByte.MockApi.Server
             RegisterRoutes(routes);
         }
 
-        public void RegisterRouteSteup(HttpMethod method, PathString path, string response, int statusCode)
+        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, bool onceOnly)
         {
-            RegisterRouteSteup(method, path, response, statusCode);
+            RegisterRouteSetup(method, path, response, statusCode, new Dictionary<string, string>(), onceOnly);
         }
 
-        public void RegisterRouteSteup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers)
+        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers, bool onceOnly)
         {
-            _routeSetups.RemoveAll(r => r.Path == path && r.Method == method);
-            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers));
+            if (!onceOnly)
+                _routeSetups.RemoveAll(r => r.Path == path && r.Method == method);
+            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers, onceOnly));
         }
 
-        public RouteSetup GetRouteSteup(HttpMethod method, PathString path)
+        public IEnumerable<RouteSetup> GetRouteSetups(HttpMethod method, PathString path)
         {
-            return _routeSetups.SingleOrDefault(r => r.Path == path && r.Method == method);
+            return _routeSetups
+                .Where(r => r.Path == path && r.Method == method)
+                .OrderByDescending(r => r.CreationDateTime);
         }
 
         public RouteMatch GetBestRouteMatch(HttpMethod method, PathString path)
         {
-            return _routeSetups.Select(r => r.MatchesOn(method, path))
-                    .OrderBy(r => r.WildcardCount)
-                    .FirstOrDefault(rm => rm.Success);
+            var matchGroup = _routeSetups.Select(r => r.MatchesOn(method, path))
+                    .Where(rm => rm.Success)
+                    .GroupBy(r => r.WildcardCount)
+                    .OrderBy(grp => grp.Key)
+                    .FirstOrDefault();
+
+            return matchGroup?
+                .OrderByDescending(r => r.Setup.CreationDateTime)
+                .FirstOrDefault(rm => rm.Success);
         }
 
         private void RegisterRoutes(RouteSetupInfo[] routes)
@@ -63,8 +71,8 @@ namespace SecByte.MockApi.Server
             foreach (var route in routes)
             {
                 var method = new HttpMethod(route.Method);
-                var response = route.Response.ToString();                
-                RegisterRouteSteup(method, route.Path, response, route.Status, route.Headers);
+                var response = route.Response.ToString();
+                RegisterRouteSetup(method, route.Path, response, route.Status, route.Headers, false);
             }
         }
 

@@ -1,4 +1,4 @@
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public enum MockApiAction
     {

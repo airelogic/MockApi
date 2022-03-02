@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
-using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public static class PathStringExtensions
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public class RouteMatch
     {
@@ -47,13 +47,13 @@ namespace SecByte.MockApi.Server
                 {
                     response = response.Replace(placeholder.Value, _wildcards[key], StringComparison.InvariantCulture);
                 }
-                else if(query.ContainsKey(key))
+                else if (query.ContainsKey(key))
                 {
                     response = response.Replace(placeholder.Value, query[key].First(), StringComparison.InvariantCulture);
-                }                
-                else if(payloadObjects.Any())
+                }
+                else if (payloadObjects.Any())
                 {
-                    foreach(var obj in payloadObjects)
+                    foreach (var obj in payloadObjects)
                     {
                         var valueFromBody = obj.SelectToken(key);
                         if (valueFromBody != null)
@@ -63,7 +63,7 @@ namespace SecByte.MockApi.Server
                         }
                     }
                 }
-                else if(headers.ContainsKey(key))
+                else if (headers.ContainsKey(key))
                 {
                     response = response.Replace(placeholder.Value, headers[key].First(), StringComparison.InvariantCulture);
                 }

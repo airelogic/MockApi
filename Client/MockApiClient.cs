@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
 
-namespace SecByte.MockApi.Client
+namespace MockApi.Client
 {
     public class MockApiClient
     {
@@ -22,7 +22,7 @@ namespace SecByte.MockApi.Client
 
         public async Task SetupFromFile(string filePath)
         {
-            if(!System.IO.File.Exists(filePath))
+            if (!System.IO.File.Exists(filePath))
             {
                 throw new System.IO.FileNotFoundException(filePath);
             }
@@ -42,7 +42,12 @@ namespace SecByte.MockApi.Client
 
         public MockApiAction Setup(string method, string path)
         {
-            return new MockApiAction(_mockApiHost, method, path);
+            return new MockApiAction(_mockApiHost, method, path, false);
+        }
+
+        public MockApiAction SetupOnce(string method, string path)
+        {
+            return new MockApiAction(_mockApiHost, method, path, true);
         }
 
         public async Task<IEnumerable<CallDetails>> Calls(string method, string path)
@@ -61,18 +66,26 @@ namespace SecByte.MockApi.Client
                 var bodyAsJson = JObject.Parse(bodyAsString);
 
                 var requests = bodyAsJson.SelectToken("requests") as JArray;
+                if (requests == null)
+                    throw new InvalidOperationException("Could not find requests item in response");
+
                 var results = new List<CallDetails>();
 
                 foreach (var request in requests.Children())
                 {
-                    JObject body = null;
-                    var temp = request["body"].ToString();
+                    var requestBody = request["body"];
+                    var requestPath = request["path"];
+
+                    if (request == null || requestBody == null || requestPath == null)
+                        throw new InvalidOperationException("Invalid request object found");
+
+                    JObject? body = null;
+                    var temp = requestBody.ToString();
                     if (string.IsNullOrEmpty(temp))
                     {
                         body = JObject.Parse(temp);
                     }
-
-                    results.Add(new CallDetails(request["path"].ToString(), body));
+                    results.Add(new CallDetails(requestPath.ToString(), body));
                 }
 
                 return results;

@@ -2,8 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-#pragma warning disable CA1822 // Members that do not access instance data can be marked as static
-namespace SecByte.MockApi.Server
+namespace MockApi.Server
 {
     public class FileSystemFileReader : IFileReader
     {
@@ -17,7 +16,7 @@ namespace SecByte.MockApi.Server
         public Task<string> ReadContentsAsync(string file)
         {
             var invalidChars = new[] { ':', '<', '>', '?', '/', '\\', '*', '|' };
-            foreach(var invalidChar in invalidChars)
+            foreach (var invalidChar in invalidChars)
                 file = file.Replace(invalidChar, '_');
             return System.IO.File.ReadAllTextAsync(Path.Combine(_basePath, file));
         }
