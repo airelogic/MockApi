@@ -17,7 +17,8 @@ namespace MockApi.Server.Handlers
         {
             var requestMethod = new HttpMethod(request.Method);
             var requestPath = request.Path;
-            var routeMatch = RouteCache.GetBestRouteMatch(requestMethod, requestPath);
+            var requestQueryString = request.QueryString;
+            var routeMatch = RouteCache.GetBestRouteMatch(requestMethod, requestPath, requestQueryString);
 
             if (routeMatch != null)
             {

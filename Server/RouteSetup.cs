@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 
 namespace MockApi.Server
@@ -11,6 +12,7 @@ namespace MockApi.Server
     {
         private readonly HttpMethod _method;
         private readonly PathString _path;
+        private readonly string _queryString;
         private readonly string _response;
         private readonly int _status;
         private readonly Dictionary<string, string> _headers;
@@ -18,7 +20,7 @@ namespace MockApi.Server
         private readonly bool _onceOnly;
         private DateTime _creationDateTime;
 
-        public RouteSetup(HttpMethod method, PathString path, string response, int status, Dictionary<string, string> headers, bool onceOnly)
+        public RouteSetup(HttpMethod method, PathString path, string response, int status, Dictionary<string, string> headers, bool onceOnly, string queryString)
         {
             _method = method;
             _path = path;
@@ -27,6 +29,7 @@ namespace MockApi.Server
             _headers = headers;
             _requests = new List<HttpRequestDetails>();
             _onceOnly = onceOnly;
+            _queryString = queryString;
             _creationDateTime = DateTime.UtcNow;
         }
 
@@ -63,7 +66,7 @@ namespace MockApi.Server
             _requests.Add(requestDetails);
         }
 
-        public RouteMatch MatchesOn(HttpMethod method, PathString requestPath)
+        public RouteMatch MatchesOn(HttpMethod method, PathString requestPath, string requestQueryString)
         {
             if (method == _method && Archived == false)
             {
@@ -87,6 +90,11 @@ namespace MockApi.Server
                         {
                             return RouteMatch.NoMatch;
                         }
+                    }
+
+                    if (!string.IsNullOrEmpty(_queryString) && (requestQueryString != _queryString))
+                    {
+                        return RouteMatch.NoMatch;
                     }
 
                     return new RouteMatch(this, wildcards);

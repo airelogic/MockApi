@@ -36,14 +36,15 @@ namespace MockApi.Server
 
         public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, bool onceOnly)
         {
-            RegisterRouteSetup(method, path, response, statusCode, new Dictionary<string, string>(), onceOnly);
+            RegisterRouteSetup(method, path, response, statusCode, new Dictionary<string, string>(), onceOnly, string.Empty);
         }
 
-        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers, bool onceOnly)
+        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers, bool onceOnly, string queryString)
         {
-            if (!onceOnly)
+            if (onceOnly)
                 _routeSetups.RemoveAll(r => r.Path == path && r.Method == method);
-            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers, onceOnly));
+
+            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers, onceOnly, queryString));
         }
 
         public IEnumerable<RouteSetup> GetRouteSetups(HttpMethod method, PathString path)
@@ -53,9 +54,12 @@ namespace MockApi.Server
                 .OrderByDescending(r => r.CreationDateTime);
         }
 
-        public RouteMatch GetBestRouteMatch(HttpMethod method, PathString path)
+        public RouteMatch GetBestRouteMatch(HttpMethod method, PathString path, string queryString)
         {
-            var matchGroup = _routeSetups.Select(r => r.MatchesOn(method, path))
+            var tempMatches = _routeSetups.Select(r => r.MatchesOn(method, path, queryString))
+                .Where(x => x.Success).ToList();
+
+            var matchGroup = _routeSetups.Select(r => r.MatchesOn(method, path, queryString))
                     .Where(rm => rm.Success)
                     .GroupBy(r => r.WildcardCount)
                     .OrderBy(grp => grp.Key)
@@ -72,7 +76,7 @@ namespace MockApi.Server
             {
                 var method = new HttpMethod(route.Method);
                 var response = route.Response.ToString();
-                RegisterRouteSetup(method, route.Path, response, route.Status, route.Headers, false);
+                RegisterRouteSetup(method, route.Path, response, route.Status, route.Headers, false, route.QueryString);
             }
         }
 

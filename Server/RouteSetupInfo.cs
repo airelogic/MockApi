@@ -14,6 +14,8 @@ namespace MockApi.Server
 
         public object Response { get; set; }
 
+        public string QueryString { get; set; } = string.Empty;
+
         public RouteSetupInfo()
         {
             Headers = new Dictionary<string, string>();
