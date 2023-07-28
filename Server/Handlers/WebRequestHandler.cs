@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace MockApi.Server.Handlers
@@ -17,7 +18,8 @@ namespace MockApi.Server.Handlers
         {
             var requestMethod = new HttpMethod(request.Method);
             var requestPath = request.Path;
-            var routeMatch = RouteCache.GetBestRouteMatch(requestMethod, requestPath);
+            var session = request.GetSessionId();
+            var routeMatch = RouteCache.GetBestRouteMatch(requestMethod, requestPath, session);
 
             if (routeMatch != null)
             {

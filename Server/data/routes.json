@@ -16,5 +16,13 @@
         "Method": "POST",
         "Status": 200,
         "Response": "file:Sample{Id}.json"
+    },
+    {
+        "Path": "/sessions",
+        "Method": "GET",
+        "Status": 200,
+        "Response": {
+            "Source": "Default"
+        }
     }
 ]

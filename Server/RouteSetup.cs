@@ -16,9 +16,10 @@ namespace MockApi.Server
         private readonly Dictionary<string, string> _headers;
         private readonly List<HttpRequestDetails> _requests;
         private readonly bool _onceOnly;
+        private readonly string _session;
         private DateTime _creationDateTime;
 
-        public RouteSetup(HttpMethod method, PathString path, string response, int status, Dictionary<string, string> headers, bool onceOnly)
+        public RouteSetup(HttpMethod method, PathString path, string response, int status, Dictionary<string, string> headers, bool onceOnly, string session)
         {
             _method = method;
             _path = path;
@@ -28,6 +29,7 @@ namespace MockApi.Server
             _requests = new List<HttpRequestDetails>();
             _onceOnly = onceOnly;
             _creationDateTime = DateTime.UtcNow;
+            _session = session;
         }
 
         public HttpMethod Method => _method;
@@ -37,6 +39,8 @@ namespace MockApi.Server
         public string Response => _response;
 
         public int StatusCode => _status;
+
+        public string SessionId => _session;
 
         public DateTime CreationDateTime => _creationDateTime;
 
@@ -63,9 +67,13 @@ namespace MockApi.Server
             _requests.Add(requestDetails);
         }
 
-        public RouteMatch MatchesOn(HttpMethod method, PathString requestPath)
+        public RouteMatch MatchesOn(HttpMethod method, PathString requestPath, string session)
         {
-            if (method == _method && Archived == false)
+            var sessionMatch = _session == string.Empty ?
+                MatchResult.DefaultMatch :
+                _session == session ? MatchResult.SessionMatch : MatchResult.NoMatch;
+
+            if (method == _method && Archived == false && sessionMatch != MatchResult.NoMatch)
             {
                 var routeParts = _path.GetSegments();
                 var requestParts = requestPath.GetSegments();
@@ -89,7 +97,7 @@ namespace MockApi.Server
                         }
                     }
 
-                    return new RouteMatch(this, wildcards);
+                    return new RouteMatch(this, wildcards, sessionMatch);
                 }
             }
 
