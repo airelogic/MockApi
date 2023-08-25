@@ -16,13 +16,11 @@
         "Method": "POST",
         "Status": 200,
         "Response": "file:Sample{Id}.json"
-    },
+    },    
     {
-        "Path": "/sessions",
-        "Method": "GET",
+        "Path": "/test/regex",
+        "Method": "POST",
         "Status": 200,
-        "Response": {
-            "Source": "Default"
-        }
+        "Response": "file:Sample{search@filter\\s?[Ee][Qq]\\s?(\\d+)}.json"
     }
 ]
