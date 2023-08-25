@@ -37,7 +37,7 @@ namespace MockApi.Server
         public string GetResponse(string body, Dictionary<string, StringValues> query, IHeaderDictionary headers)
         {
             var response = _routeSetup.Response;
-            var placeholders = Regex.Matches(response, @"{([A-Za-z0-9\.\[\]]+)}");
+            var placeholders = Regex.Matches(response, @"{([A-Za-z0-9_\-\.\[\]]+)}");
             var payloadObjects = BodyAsObject(body);
 
             foreach (Match placeholder in placeholders)
