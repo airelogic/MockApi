@@ -37,7 +37,7 @@ namespace MockApi.Server
         public string GetResponse(string body, Dictionary<string, StringValues> query, IHeaderDictionary headers)
         {
             var response = _routeSetup.Response;
-            var placeholders = Regex.Matches(response, @"{(.+)}");
+            var placeholders = Regex.Matches(response, @"{([^{}]+)}");
             var payloadObjects = BodyAsObject(body);
 
             foreach (Match placeholder in placeholders)
@@ -99,6 +99,44 @@ namespace MockApi.Server
                 body = $"[{body}]";
 
             return JArray.Parse(body);
+        }
+
+        public Dictionary<string, string> ProcessHeaders(Dictionary<string, string> rawHeaders, string body, Dictionary<string, StringValues> query)
+        {
+            var processedHeaders = new Dictionary<string, string>();
+            var payloadObjects = BodyAsObject(body);
+            foreach(var header in rawHeaders)
+            {
+                var processedValue = header.Value;
+                var placeholders = Regex.Matches(header.Value, @"{([^{}]+)}");
+                foreach(Match placeholder in placeholders)
+                {
+                    var key = placeholder.Groups[1].Value;
+                    if (_wildcards.ContainsKey(key))
+                    {
+                        processedValue = processedValue.Replace(placeholder.Value, _wildcards[key], StringComparison.InvariantCulture);
+                    }
+                    else if (query.ContainsKey(key))
+                    {
+                        processedValue = processedValue.Replace(placeholder.Value,query[key].First(), StringComparison.InvariantCulture);
+                    }
+                    else if (payloadObjects.Any())
+                    {
+                        foreach (var obj in payloadObjects)
+                        {
+                            var valueFromBody = obj.SelectToken(key);
+                            if (valueFromBody != null)
+                            {
+                                processedValue = processedValue.Replace(placeholder.Value, valueFromBody.ToString(), StringComparison.InvariantCulture);
+                                break;
+                            }
+                        }
+                    }
+                }
+                processedHeaders.Add(header.Key, processedValue);
+            }
+
+            return processedHeaders;
         }
     }
 
