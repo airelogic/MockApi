@@ -22,8 +22,9 @@ namespace MockApi.Server.Handlers
             if (routeMatch != null)
             {
                 var bodyText = await request.Body?.ReadAsTextAsync();
+                var query = request.GetQuery();
                 routeMatch.Setup.LogRequest(request.Path, request.Method, bodyText, request.Headers);
-                var response = routeMatch.GetResponse(bodyText, request.GetQuery(), request.Headers);
+                var response = routeMatch.GetResponse(bodyText, query, request.Headers);
 
                 if (response.StartsWith("file:"))
                 {
@@ -48,7 +49,7 @@ namespace MockApi.Server.Handlers
                     StatusCode = routeMatch.Setup.StatusCode,
                     Payload = response,
                     ContentType = "application/json; charset=utf-8",
-                    Headers = routeMatch.Setup.Headers
+                    Headers = routeMatch.ProcessHeaders(routeMatch.Setup.Headers, bodyText, query)
                 };
             }
 
