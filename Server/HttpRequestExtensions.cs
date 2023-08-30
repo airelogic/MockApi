@@ -50,6 +50,16 @@ namespace MockApi.Server
             return false;
         }
 
+        public static string GetSessionId(this IHttpRequestFeature request)
+        {
+            const string header = "MockApi-Session";
+            if(request.Headers.ContainsKey(header))
+            {
+                return request.Headers[header];
+            }
+            return "";
+        }
+
         public static Dictionary<string, StringValues> GetQuery(this IHttpRequestFeature request)
         {
             return Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(request.QueryString);
