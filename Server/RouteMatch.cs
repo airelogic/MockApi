@@ -11,24 +11,24 @@ namespace MockApi.Server
     public class RouteMatch
     {
         private readonly RouteSetup _routeSetup;
-        private readonly bool _success;
+        private readonly MatchResult _result;
         private readonly Dictionary<string, string> _wildcards;
 
-        public RouteMatch(RouteSetup routeSetup, Dictionary<string, string> wildcards)
+        public RouteMatch(RouteSetup routeSetup, Dictionary<string, string> wildcards, MatchResult result)
         {
-            _success = true;
+            _result = result;
             _wildcards = wildcards;
             _routeSetup = routeSetup;
         }
 
-        private RouteMatch(bool success)
+        private RouteMatch(MatchResult result)
         {
-            _success = success;
+            _result = result;
         }
 
-        public static RouteMatch NoMatch => new RouteMatch(false);
+        public static RouteMatch NoMatch => new RouteMatch(MatchResult.NoMatch);
 
-        public bool Success => _success;
+        public MatchResult Result => _result;
 
         public RouteSetup Setup => _routeSetup;
 
@@ -138,5 +138,12 @@ namespace MockApi.Server
 
             return processedHeaders;
         }
+    }
+
+    public enum MatchResult
+    {
+        NoMatch = 0,
+        DefaultMatch = 1,
+        SessionMatch = 2
     }
 }

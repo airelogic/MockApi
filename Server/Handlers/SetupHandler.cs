@@ -16,8 +16,9 @@ namespace MockApi.Server.Handlers
             var statusCode = request.GetMockApiStatus();
             var bodyAsText = await request.Body.ReadAsTextAsync();
             var onceOnly = request.GetMockApiFlag("Once");
+            var sessionId = request.GetSessionId();
 
-            RouteCache.RegisterRouteSetup(method, path, bodyAsText, statusCode, onceOnly);
+            RouteCache.RegisterRouteSetup(method, path, bodyAsText, statusCode, onceOnly, sessionId);
 
             return new MockApiResponse
             {

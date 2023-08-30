@@ -34,16 +34,16 @@ namespace MockApi.Server
             RegisterRoutes(routes);
         }
 
-        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, bool onceOnly)
+        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, bool onceOnly, string session)
         {
-            RegisterRouteSetup(method, path, response, statusCode, new Dictionary<string, string>(), onceOnly);
+            RegisterRouteSetup(method, path, response, statusCode, new Dictionary<string, string>(), onceOnly, session);
         }
 
-        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers, bool onceOnly)
+        public void RegisterRouteSetup(HttpMethod method, PathString path, string response, int statusCode, Dictionary<string, string> headers, bool onceOnly, string session)
         {
             if (!onceOnly)
-                _routeSetups.RemoveAll(r => r.Path == path && r.Method == method);
-            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers, onceOnly));
+                _routeSetups.RemoveAll(r => r.Path == path && r.Method == method && r.SessionId == session);
+            _routeSetups.Add(new RouteSetup(method, path, response, statusCode, headers, onceOnly, session));
         }
 
         public IEnumerable<RouteSetup> GetRouteSetups(HttpMethod method, PathString path)
@@ -53,17 +53,18 @@ namespace MockApi.Server
                 .OrderByDescending(r => r.CreationDateTime);
         }
 
-        public RouteMatch GetBestRouteMatch(HttpMethod method, PathString path)
+        public RouteMatch GetBestRouteMatch(HttpMethod method, PathString path, string session)
         {
-            var matchGroup = _routeSetups.Select(r => r.MatchesOn(method, path))
-                    .Where(rm => rm.Success)
+            var matchGroup = _routeSetups.Select(r => r.MatchesOn(method, path, session))
+                    .Where(rm => rm.Result != MatchResult.NoMatch)
                     .GroupBy(r => r.WildcardCount)
                     .OrderBy(grp => grp.Key)
                     .FirstOrDefault();
 
             return matchGroup?
-                .OrderByDescending(r => r.Setup.CreationDateTime)
-                .FirstOrDefault(rm => rm.Success);
+                .OrderByDescending(r => r.Result)
+                .ThenBy(r => r.Setup.CreationDateTime)
+                .FirstOrDefault(rm => rm.Result != MatchResult.NoMatch);
         }
 
         private void RegisterRoutes(RouteSetupInfo[] routes)
@@ -72,7 +73,7 @@ namespace MockApi.Server
             {
                 var method = new HttpMethod(route.Method);
                 var response = route.Response.ToString();
-                RegisterRouteSetup(method, route.Path, response, route.Status, route.Headers, false);
+                RegisterRouteSetup(method, route.Path, response, route.Status, route.Headers, false, string.Empty);
             }
         }
 
