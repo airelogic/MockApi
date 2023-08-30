@@ -37,7 +37,7 @@ namespace MockApi.Server
         public string GetResponse(string body, Dictionary<string, StringValues> query, IHeaderDictionary headers)
         {
             var response = _routeSetup.Response;
-            var placeholders = Regex.Matches(response, @"{([^{}]+)}");
+            var placeholders = Regex.Matches(response, @"{([^{}:]+)}");
             var payloadObjects = BodyAsObject(body);
 
             foreach (Match placeholder in placeholders)
@@ -108,7 +108,7 @@ namespace MockApi.Server
             foreach(var header in rawHeaders)
             {
                 var processedValue = header.Value;
-                var placeholders = Regex.Matches(header.Value, @"{([^{}]+)}");
+                var placeholders = Regex.Matches(header.Value, @"{([^{}:]+)}");
                 foreach(Match placeholder in placeholders)
                 {
                     var key = placeholder.Groups[1].Value;
